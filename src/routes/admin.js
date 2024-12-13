@@ -6,8 +6,8 @@ router.get('/login', async (req, res) => {
     try {
         res.json({ message: '관리자 로그인 시도' });
     } catch (error) {
-        console.error('濡쒓렇�씤 �슂泥� 泥섎━ 以� �삤瑜�:', error);
-        res.status(500).json({ success: false, message: '濡쒓렇�씤 �슂泥� 泥섎━ 以� 臾몄젣媛� 諛쒖깮�뻽�뒿�땲�떎.' });
+        console.error('관리자 로그인 실패:', error);
+        res.status(500).json({ success: false, message: '관리자 로그인 실패.' });
     }
 });
 
@@ -20,25 +20,25 @@ router.post('/login_process', async (req, res) => {
 
         if (results.length > 0) {
             req.session.adminEmail = results[0].adminEmail;
-            console.log('愿�由ъ옄 濡쒓렇�씤 �꽦怨�!');
+            console.log('관리자 로그인 성공!');
 
             res.status(201).json({
                 success: true,
-                message: "濡쒓렇�씤�씠 �꽦怨듭쟻�쑝濡� 泥섎━�릺�뿀�뒿�땲�떎.",
+                message: "관리자 로그인 성공",
                 property: 201
             });
         } else {
-            console.log('愿�由ъ옄 濡쒓렇�씤 �떎�뙣');
+            console.log('관리자 로그인 실패');
 
             res.status(401).json({
                 success: false,
-                message: "愿�由ъ옄 �젙蹂닿�� �젙�솗�븯吏� �븡�뒿�땲�떎. �떎�떆 �떆�룄�빐二쇱꽭�슂!",
+                message: "관리자 로그인 실패",
                 property: 400
             });
         }
     } catch (error) {
-        console.error('濡쒓렇�씤 泥섎━ 以� �삤瑜�:', error);
-        res.status(500).json({ success: false, message: '濡쒓렇�씤 泥섎━ 以� 臾몄젣媛� 諛쒖깮�뻽�뒿�땲�떎.' });
+        console.error('관리자 로그인 중 에러 발생:', error);
+        res.status(500).json({ success: false, message: '관리자 로그인 실패.' });
     }
 });
 
@@ -46,19 +46,19 @@ router.get('/logout', async (req, res) => {
     try {
         req.session.destroy(err => {
             if (err) {
-                console.error('愿�由ъ옄 濡쒓렇�븘�썐 以� �뿉�윭 諛쒖깮:', err);
-                return res.status(500).send('愿�由ъ옄 濡쒓렇�븘�썐 �떎�뙣');
+                console.error('관리자 로그아웃 중 에러 발생:', err);
+                return res.status(500).send('관리자 로그아웃 실패');
             }
             res.status(201).json({
                 success: true,
-                message: "愿�由ъ옄 濡쒓렇�븘�썐 �꽦怨�",
+                message: "관리자 로그아웃 성공",
                 property: 200
             });
-            console.log('愿�由ъ옄 濡쒓렇�븘�썐 �꽦怨�!');
+            console.log('관리자 로그아웃 성공');
         });
     } catch (error) {
-        console.error('愿�由ъ옄 濡쒓렇�븘�썐 以� �뿉�윭 諛쒖깮:', error);
-        res.status(500).json({ success: false, message: '愿�由ъ옄 濡쒓렇�븘�썐 �떎�뙣' });
+        console.error('관리자 로그아웃 중 에러 발생:', error);
+        res.status(500).json({ success: false, message: '관리자 로그아웃 실패' });
     }
 });
 
