@@ -4,7 +4,7 @@ const db = require('../db');
 
 router.get('/login', async (req, res) => {
     try {
-        res.json({ message: '濡쒓렇�씤 �럹�씠吏�' });
+        res.json({ message: '관리자 로그인 시도' });
     } catch (error) {
         console.error('濡쒓렇�씤 �슂泥� 泥섎━ 以� �삤瑜�:', error);
         res.status(500).json({ success: false, message: '濡쒓렇�씤 �슂泥� 泥섎━ 以� 臾몄젣媛� 諛쒖깮�뻽�뒿�땲�떎.' });
