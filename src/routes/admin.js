@@ -147,6 +147,7 @@ router.delete('/users/:userId', async (req, res) => {
 
 router.get('/community/posts', async (req, res) => {
     try {
+        console.log('게시글 정보 조회');
         const results = await db.query('SELECT * FROM COMMUNITY');
         res.status(200).json({
             success: true,
@@ -173,36 +174,35 @@ router.delete('/community/post/:postId', async (req, res) => {
         console.log('해당 게시글 알림 삭제:', alarmDeleteResult);
 
         const commentChildDeleteResult = await connection.query('DELETE FROM COMMENT WHERE postId = ? AND parentId IS NOT NULL', [postId]);
-        console.log('해당 게시글 :', commentChildDeleteResult);
+        console.log('해당 게시글 답글 삭제 :', commentChildDeleteResult);
 
         const commentDeleteResult = await connection.query('DELETE FROM COMMENT WHERE postId = ?', [postId]);
-        console.log('�빐�떦 寃뚯떆湲� �뙎湲� �궘�젣:', commentDeleteResult);
+        console.log('해당 게시글 댓글 삭제:', commentDeleteResult);
 
         const result = await connection.query('DELETE FROM COMMUNITY WHERE postId = ?', [postId]);
-        console.log('�빐�떦 寃뚯떆湲� �궘�젣:', result);
+        console.log('해당 게시글 삭제:', result);
 
         if (result.affectedRows === 0) {
             await connection.rollback();
-            console.log('寃뚯떆湲� �궘�젣 以� �뿉�윭 諛쒖깮.');
             return res.status(404).json({
                 success: false,
-                message: '寃뚯떆湲� �궘�젣 �떎�뙣',
+                message: '게시글 삭제 실패',
             });
         }
 
         await connection.commit();
-        console.log('�빐�떦 寃뚯떆湲� �궘�젣:', postId);
+        console.log('게시글 삭제 성공:', postId);
 
         return res.status(200).json({
             success: true,
-            message: '寃뚯떆湲� �궘�젣 �꽦怨�.',
+            message: '게시글 삭제 성공',
         });
     } catch (error) {
         await connection.rollback();
-        console.error('寃뚯떆湲� �궘�젣 以� �뿉�윭 諛쒖깮:', error);
+        console.error('게시글 삭제 중 에러 발생:', error);
         return res.status(500).json({
             success: false,
-            message: '寃뚯떆湲� �궘�젣 �떎�뙣.',
+            message: '게시글 삭제 실패.',
         });
     } finally {
         connection.release();
@@ -211,26 +211,26 @@ router.delete('/community/post/:postId', async (req, res) => {
 
 router.get('/diseases', async (req, res) => {
     try {
-        console.log('吏덊솚 �젙蹂� 議고쉶');
+        console.log('질환 정보 조회');
         const results = await db.query('SELECT * FROM DISEASE');
 
         if (results.length === 0) {
             return res.status(200).json({
                 success: false,
-                message: "吏덊솚 �젙蹂� 議고쉶媛� �뾾�쓬",
+                message: "질환 정보 조회 실패",
                 property: 500
             });
         }
 
         res.status(200).json({
             success: true,
-            message: "吏덊솚 �젙蹂� 議고쉶 �꽦怨�",
+            message: "질환 정보 조회 성공",
             property: 200,
             diseases: results
         });
     } catch (error) {
-        console.error('吏덊솚 �젙蹂� 議고쉶 以� �뿉�윭 諛쒖깮:', error);
-        res.status(500).json({ success: false, message: '吏덊솚 �젙蹂� 議고쉶 �떎�뙣' });
+        console.error('질환 정보 조회 중 에러 발생:', error);
+        res.status(500).json({ success: false, message: '질환 정보 조회 실패' });
     }
 });
 
@@ -243,26 +243,26 @@ router.get('/diseases/:diseaseId', async (req, res) => {
         if (results.length > 0) {
             res.status(200).json({
                 success: true,
-                message: '吏덊솚 �젙蹂� 議고쉶 �꽦怨�',
+                message: '특정 질환 조회 성공',
                 property: 200,
                 disease: results
             });
         } else {
             res.status(404).json({
                 success: false,
-                message: '吏덊솚 �젙蹂� 議고쉶 �떎�뙣',
+                message: '특정 질환 조회 실패',
                 property: 404
             });
         }
     } catch (error) {
-        console.error('吏덊솚 �젙蹂� 議고쉶 以� �뿉�윭 諛쒖깮:', error);
-        res.status(500).json({ success: false, message: '吏덊솚 �젙蹂� 議고쉶 �떎�뙣' });
+        console.error('특정 질환 조회 중 에러 발생:', error);
+        res.status(500).json({ success: false, message: '특정 질환 조회 실패' });
     }
 });
 
 router.get('/dashboard', async (req, res) => {
     try {
-        console.log('����떆蹂대뱶 議고쉶');
+        console.log('대시보드 조회');
         const adminQuery = `
             SELECT adminEmail, adminName, (SELECT COUNT(*) FROM ADMIN) AS admin_count 
             FROM ADMIN
@@ -297,8 +297,8 @@ router.get('/dashboard', async (req, res) => {
 
         res.status(200).json(response);
     } catch (error) {
-        console.error('����떆蹂대뱶 議고쉶 以� �뿉�윭 諛쒖깮:', error);
-        res.status(500).json({ success: false, message: '����떆蹂대뱶 議고쉶 �떎�뙣' });
+        console.error('대시보드 조회 실패:', error);
+        res.status(500).json({ success: false, message: '대시보드 조회 실패' });
     }
 });
 
