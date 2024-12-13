@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db'); // db.js 모듈?�� �??��?��?��?��.
+const db = require('../db');
 const pool = require('../db');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'your_secret_key'; // JWT 토큰 (유효기간 1시간)
@@ -29,15 +29,6 @@ router.post('/send-verification-link', async (req, res) => {
     console.log('userEmail:', userEmail);
 
     try {
-        /* bad user*/
-        /*
-        const [badUser] = await db.query('SELECT * FROM BAD_USER WHERE badUserEmail = ?', [userEmail]);
-
-        if (badUser && badUser.length > 0) {
-            return res.status(400).json({ message: '차단된 이메일입니다.' });
-        }
-        */
-        /* bad user*/
         // 1. 이메일 중복 확인
         const existingUser = await db.query('SELECT * FROM USER WHERE userEmail = ?', [userEmail]);
 
@@ -50,8 +41,8 @@ router.post('/send-verification-link', async (req, res) => {
 
         // 토큰을 데이터베이스에 저장
         const insertResult = await db.query('INSERT INTO VERIFICATION_TOKENS (token, userEmail) VALUES (?, ?)', [token, userEmail]);
-        console.log(`Generated token for ${userEmail}: ${token}`);
-        console.log('Token insert result:', insertResult);
+        //console.log(`Generated token for ${userEmail}: ${token}`);
+        //console.log('Token insert result:', insertResult);
 
         // 3. 인증 링크 생성
         const verificationLink = `http://ceprj.gachon.ac.kr:60017/api/user/verify-email?token=${token}`;
@@ -70,8 +61,6 @@ router.post('/send-verification-link', async (req, res) => {
         res.status(500).json({ message: '이메일 인증 링크 전송에 실패했습니다.', error: error.message });
     }
 });
-
-
 
 // 이메일 인증 확인 API
 router.get('/verify-email', async (req, res) => {
@@ -145,9 +134,6 @@ router.get('/verify-status/:email', async (req, res) => {
     }
 });
 
-
-
-
 // 로그인 API
 router.post('/login', async (req, res) => {
     const { userEmail, userPW } = req.body;
@@ -200,32 +186,4 @@ router.post('/login', async (req, res) => {
     }
 });
 
-
-// 리프레시 토큰을 이용해 새로운 JWT 발급 API(미완성)
-// router.post('/refresh-token', async (req, res) => {
-//     const { refreshToken } = req.body;
-
-//     if (!refreshToken) {
-//         return res.status(401).json({ message: '리프레시 토큰이 제공되지 않았습니다.' });
-//     }
-
-//     try {
-//         // 리프레시 토큰 검증
-//         jwt.verify(refreshToken, REFRESH_SECRET_KEY, (err, user) => {
-//             if (err) {
-//                 return res.status(403).json({ message: '유효하지 않은 리프레시 토큰입니다.' });
-//             }
-
-//             // 리프레시 토큰이 유효하면 새로운 JWT 발급
-//             const newAccessToken = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-
-//             return res.status(200).json({ accessToken: newAccessToken });
-//         });
-//     } catch (error) {
-//         console.error('리프레시 토큰 요청 실패:', error);
-//         return res.status(500).json({ message: '서버 오류', error });
-//     }
-// });
-
 module.exports = router;
-
