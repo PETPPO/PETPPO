@@ -64,18 +64,18 @@ router.get('/logout', async (req, res) => {
 
 router.get('/users', async (req, res) => {
     try {
-        console.log('�궗�슜�옄 �젙蹂� 議고쉶.');
+        console.log('사용자 정보 조회.');
 
         const results = await db.query('SELECT * FROM USER');
         res.status(200).json({
             success: true,
-            message: "�궗�슜�옄 �젙蹂� 議고쉶 �꽦怨�",
+            message: "사용자 정보 조회 성공",
             property: 200,
             users: results
         });
     } catch (error) {
-        console.error('�궗�슜�옄 �젙蹂� 議고쉶 以� �뿉�윭 諛쒖깮:', error);
-        res.status(500).send('�궗�슜�옄 �젙蹂� 議고쉶 �떎�뙣');
+        console.error('사용자 정보 조회 중 에러 발생:', error);
+        res.status(500).send('사용자 정보 조회 실패');
     }
 });
 
@@ -92,53 +92,53 @@ router.delete('/users/:userId', async (req, res) => {
             await connection.rollback();
             return res.status(404).json({
                 success: false,
-                message: '�궗�슜�옄 �젙蹂닿�� �뾾�뒿�땲�떎.',
+                message: '사용자 삭제 중 에러 발생',
             });
         }
         const badUserEmail = userResult.userEmail;
 
         await connection.query('INSERT INTO BAD_USER (badUserEmail) VALUES (?)', [badUserEmail]);
-        console.log('BAD_USER �뀒�씠釉붿뿉 異붽��:', badUserEmail);
+        console.log('BAD_USER 테이블에 해당 사용자 추가:', badUserEmail);
 
         await connection.query('DELETE FROM ALARM WHERE commentId IN (SELECT commentId FROM COMMENT WHERE userId = ? AND parentId IS NOT NULL)', [userId]);
-        console.log('�빐�떦 �궗�슜�옄 �븣由� �궘�젣(�떟湲�)');
+        console.log('해당 사용자 알림 삭제(답글)');
 
         await connection.query('DELETE FROM ALARM WHERE commentId IN (SELECT commentId FROM COMMENT WHERE userId = ?)', [userId]);
-        console.log('�빐�떦 �궗�슜�옄 �븣由� �궘�젣(�뙎湲�)');
+        console.log('해당 사용자 알림 삭제(댓글)');
         
         const commentParentDeleteResult = await connection.query('DELETE FROM COMMENT WHERE userId = ? AND parentId IS NOT NULL', [userId]);
-        console.log('�빐�떦 �궗�슜�옄 �떟湲� �궘�젣:', commentParentDeleteResult);
+        console.log('해당 사용자 답글 삭제:', commentParentDeleteResult);
         
         const commentDeleteResult = await connection.query('DELETE FROM COMMENT WHERE userId = ?', [userId]);
-        console.log('�빐�떦 �궗�슜�옄 �뙎湲� �궘�젣:', commentDeleteResult);
+        console.log('해당 사용자 댓글 삭제:', commentDeleteResult);
 
         const communityDeleteResult = await connection.query('DELETE FROM COMMUNITY WHERE userId = ?', [userId]);
-        console.log('�빐�떦 �궗�슜�옄 寃뚯떆湲� �궘�젣:', communityDeleteResult);
+        console.log('해당 사용자 게시글 삭제:', communityDeleteResult);
 
         const userDeleteResult = await connection.query('DELETE FROM USER WHERE userId = ?', [userId]);
-        console.log('�빐�떦 �궗�슜�옄 �궘�젣:', userDeleteResult);
+        console.log('해당 사용자 삭제:', userDeleteResult);
 
         if (userDeleteResult.affectedRows === 0) {
             await connection.rollback();
             return res.status(404).json({
                 success: false,
-                message: '�궗�슜�옄 �궘�젣 �떎�뙣',
+                message: '사용자 삭제 중 에러 발생',
             });
         }
 
         await connection.commit();
-        console.log('�빐�떦 �궗�슜�옄 �궘�젣 �꽦怨�:', userId);
+        console.log('해당 사용자 삭제:', userId);
 
         res.status(200).json({
             success: true,
-            message: '�빐�떦 �궗�슜�옄 �꽦怨듭쟻�쑝濡� �궘�젣.',
+            message: '사용자 삭제 성공',
         });
     } catch (error) {
         await connection.rollback();
         console.error('user delete error: ', error);
         res.status(500).json({
             success: false,
-            message: '�빐�떦 �궗�슜�옄 �궘�젣 �떎�뙣',
+            message: '사용자 삭제 실패',
         });
     } finally {
         connection.release();
@@ -150,30 +150,30 @@ router.get('/community/posts', async (req, res) => {
         const results = await db.query('SELECT * FROM COMMUNITY');
         res.status(200).json({
             success: true,
-            message: '寃뚯떆湲� �젙蹂� 議고쉶 �꽦怨�',
+            message: '게시글 정보 조회 성공',
             property: 200,
             ports: results
         });
         console.log(results)
     } catch (error) {
-        console.error('寃뚯떆湲� �젙蹂� 議고쉶 以� �뿉�윭 諛쒖깮:', error);
-        res.status(500).send('寃뚯떆湲� �젙蹂� 議고쉶 �떎�뙣');
+        console.error('게시글 정보 조회 중 에러 발생:', error);
+        res.status(500).send('게시글 정보 조회 실패');
     }
 });
 
 router.delete('/community/post/:postId', async (req, res) => {
     const postId = req.params.postId;
     const connection = await db.getConnection();
-    console.log('寃뚯떆湲� ID:', postId);
+    console.log('게시글 ID:', postId);
 
     try {
         await connection.beginTransaction();
 
         const alarmDeleteResult = await connection.query('DELETE FROM ALARM WHERE postId = ?', [postId]);
-        console.log('�빐�떦 寃뚯떆湲� �븣�엺 �궘�젣:', alarmDeleteResult);
+        console.log('해당 게시글 알림 삭제:', alarmDeleteResult);
 
         const commentChildDeleteResult = await connection.query('DELETE FROM COMMENT WHERE postId = ? AND parentId IS NOT NULL', [postId]);
-        console.log('�빐�떦 寃뚯떆湲� �떟湲� �궘�젣:', commentChildDeleteResult);
+        console.log('해당 게시글 :', commentChildDeleteResult);
 
         const commentDeleteResult = await connection.query('DELETE FROM COMMENT WHERE postId = ?', [postId]);
         console.log('�빐�떦 寃뚯떆湲� �뙎湲� �궘�젣:', commentDeleteResult);
